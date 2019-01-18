@@ -47,6 +47,10 @@ final class LocationComponentConstants {
   static final String PROPERTY_FOREGROUND_STALE_ICON = "mapbox-property-foreground-stale-icon";
   static final String PROPERTY_BACKGROUND_STALE_ICON = "mapbox-property-background-stale-icon";
   static final String PROPERTY_BEARING_ICON = "mapbox-property-shadow-icon";
+  static final String PULSING_CIRCLE_LAYER_COLOR = "mapbox-property-pulsing-circle-color";
+  static final String PULSING_CIRCLE_LAYER_DURATION = "mapbox-property-pulsing-circle-duration";
+  static final String PULSING_CIRCLE_LAYER_FREQUENCY = "mapbox-property-pulsing-circle-frequency";
+  static final String PULSING_CIRCLE_LAYER_ALPHA = "mapbox-property-pulsing-circle-alpha";
 
   // Layers
   static final String SHADOW_LAYER = "mapbox-location-shadow";
@@ -54,6 +58,7 @@ final class LocationComponentConstants {
   static final String BACKGROUND_LAYER = "mapbox-location-stroke-layer";
   static final String ACCURACY_LAYER = "mapbox-location-accuracy-layer";
   static final String BEARING_LAYER = "mapbox-location-bearing-layer";
+  static final String PULSING_CIRCLE_LAYER = "mapbox-location-pulsing-circle-layer";
 
   // Icons
   static final String FOREGROUND_ICON = "mapbox-location-icon";

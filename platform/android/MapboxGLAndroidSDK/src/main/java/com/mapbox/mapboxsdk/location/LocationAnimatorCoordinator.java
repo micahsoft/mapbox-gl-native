@@ -7,6 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.SparseArray;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -30,6 +34,7 @@ import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_ACCURA
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_COMPASS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_GPS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_LATLNG;
+import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_PULSING_LOCATION_CIRCLE;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_TILT;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_ZOOM;
 import static com.mapbox.mapboxsdk.location.Utils.immediateAnimation;
@@ -45,12 +50,14 @@ final class LocationAnimatorCoordinator {
   private Location previousLocation;
   private float previousAccuracyRadius = -1;
   private float previousCompassBearing = -1;
+  private float previousPulsingCircleRadius = -1;
   private long locationUpdateTimestamp = -1;
   private float durationMultiplier;
   private final MapboxAnimatorProvider animatorProvider;
   private final MapboxAnimatorSetProvider animatorSetProvider;
   private boolean compassAnimationEnabled;
   private boolean accuracyAnimationEnabled;
+  private boolean pulsingCircleAnimationEnabled;
 
   @VisibleForTesting
   int maxAnimationFps = Integer.MAX_VALUE;
@@ -145,6 +152,16 @@ final class LocationAnimatorCoordinator {
                    @Nullable MapboxMap.CancelableCallback callback) {
     updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.tilt, callback);
     playAnimators(animationDuration, ANIMATOR_TILT);
+  }
+
+  void startLocationCirclePulsing(LocationComponentOptions options, MapboxMap mapboxMap, Location location) {
+    float targetPulsingCircleRadius = Utils.calculatePulsingCircleRadius(mapboxMap, location);
+    if (previousPulsingCircleRadius < 0) {
+      previousPulsingCircleRadius = targetPulsingCircleRadius;
+    }
+    playPulsingCircleAnimator(options.pulsingCircleDuration(), options.pulsingCircleInterpolator(),
+      mapboxMap, targetPulsingCircleRadius);
+    this.previousPulsingCircleRadius = targetPulsingCircleRadius;
   }
 
   private LatLng getPreviousLayerLatLng() {
@@ -291,6 +308,30 @@ final class LocationAnimatorCoordinator {
     animatorSetProvider.startAnimation(animators, new LinearInterpolator(), duration);
   }
 
+  private void playPulsingCircleAnimator(float durationOfSinglePulse, String interpolatorAnimationType,
+                                         MapboxMap mapboxMap, float targetPulsingCircleRadius) {
+    Interpolator interpolatorAnimationToUse;
+    switch(interpolatorAnimationType) {
+      case PulsingLocationMode.LINEAR:
+        interpolatorAnimationToUse = new LinearInterpolator();
+        break;
+      case PulsingLocationMode.ACCELERATE:
+        interpolatorAnimationToUse = new AccelerateInterpolator();
+        break;
+      case PulsingLocationMode.DECELERATE:
+        interpolatorAnimationToUse = new DecelerateInterpolator();
+        break;
+      case PulsingLocationMode.BOUNCE:
+        interpolatorAnimationToUse = new BounceInterpolator();
+        break;
+      default:
+        interpolatorAnimationToUse = new LinearInterpolator();
+        break;
+    }
+    new PulsingLocationCircleAnimator().animatePulsingCircleRadius(interpolatorAnimationToUse,
+      durationOfSinglePulse, mapboxMap, targetPulsingCircleRadius);
+  }
+
   void resetAllCameraAnimations(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {
     resetCameraCompassAnimation(currentCameraPosition);
     boolean snap = resetCameraLocationAnimations(currentCameraPosition, isGpsNorth);
@@ -381,11 +422,15 @@ final class LocationAnimatorCoordinator {
     this.accuracyAnimationEnabled = accuracyAnimationEnabled;
   }
 
-  void setMaxAnimationFps(int maxAnimationFps) {
-    if (maxAnimationFps <= 0) {
-      Logger.e(TAG, "Max animation FPS cannot be less or equal to 0.");
-      return;
-    }
-    this.maxAnimationFps = maxAnimationFps;
+  void setMaxAnimationFps(int maxAnimationFps){
+      if (maxAnimationFps <= 0) {
+        Logger.e(TAG, "Max animation FPS cannot be less or equal to 0.");
+        return;
+      }
+      this.maxAnimationFps = maxAnimationFps;
+  }
+
+  void setPulsingCircleAnimationEnabled(boolean pulsingCircleAnimationEnabled) {
+    this.pulsingCircleAnimationEnabled = pulsingCircleAnimationEnabled;
   }
 }

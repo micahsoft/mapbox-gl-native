@@ -27,6 +27,9 @@ import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_GPS_BEARING;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_LOCATION_STALE;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PULSING_CIRCLE_LAYER;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PULSING_CIRCLE_LAYER_COLOR;
+import static com.mapbox.mapboxsdk.location.LocationComponentConstants.PULSING_CIRCLE_LAYER_ALPHA;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.SHADOW_ICON;
 import static com.mapbox.mapboxsdk.location.LocationComponentConstants.SHADOW_LAYER;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
@@ -105,6 +108,16 @@ class LayerSourceProvider {
         circleColor(get(PROPERTY_ACCURACY_COLOR)),
         circleOpacity(get(PROPERTY_ACCURACY_ALPHA)),
         circleStrokeColor(get(PROPERTY_ACCURACY_COLOR)),
+        circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
+      );
+  }
+
+  @NonNull
+  Layer generatePulsingCircleLayer() {
+    return new CircleLayer(PULSING_CIRCLE_LAYER, LOCATION_SOURCE)
+      .withProperties(
+        circleColor(get(PULSING_CIRCLE_LAYER_COLOR)),
+        circleOpacity(get(PULSING_CIRCLE_LAYER_ALPHA)),
         circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
       );
   }

@@ -2,6 +2,7 @@ package com.mapbox.mapboxsdk.testapp.activity.location;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -125,6 +126,21 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
     this.mapboxMap = mapboxMap;
 
     mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
+      int[] padding;
+      if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        padding = new int[] {0, 750, 0, 0};
+      } else {
+        padding = new int[] {0, 250, 0, 0};
+      }
+
+      LocationComponentOptions options = LocationComponentOptions.builder(this)
+        .padding(padding)
+        .layerBelow("waterway-label")
+        .pulsingCircleEnabled(true)
+        .pulsingCircleColor(Color.RED)
+        .pulsingCircleAlpha(0.4)
+        .build();
+
       locationComponent = mapboxMap.getLocationComponent();
       locationComponent.activateLocationComponent(this, style, true,
         new LocationEngineRequest.Builder(750)
