@@ -138,7 +138,7 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
         .layerBelow("waterway-label")
         .pulsingCircleEnabled(true)
         .pulsingCircleColor(Color.RED)
-        .pulsingCircleAlpha(0.4)
+        .pulsingCircleAlpha(0.4f)
         .build();
 
       locationComponent = mapboxMap.getLocationComponent();
