@@ -34,7 +34,7 @@ const androidMetrics = binaries.map(binary => {
 // Check if existing binary metrics exist for iOS metrics.
 s3.getObject({
   Bucket: 'mapbox-loading-dock', 
-  Key: `raw/nadia_staging_test_v4/${process.env['CIRCLE_SHA1']}.json.gz`
+  Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`
 }, (getObjectError, existingData) => {
   if (getObjectError) {
     // If no existing iOS metrics are found,
@@ -43,7 +43,7 @@ s3.getObject({
       return new AWS.S3({region: 'us-east-1'}).putObject({
           Body: zlib.gzipSync(androidMetrics),
           Bucket: 'mapbox-loading-dock',
-          Key: `raw/nadia_staging_test_v4/${process.env['CIRCLE_SHA1']}.json.gz`,
+          Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
           CacheControl: 'max-age=300',
           ContentType: 'application/json'
       }, function (putObjectError, res) {
@@ -71,7 +71,7 @@ s3.getObject({
       return new AWS.S3({region: 'us-east-1'}).putObject({
           Body: zlib.gzipSync(updatedMetrics),
           Bucket: 'mapbox-loading-dock',
-          Key: `raw/nadia_staging_test_v4/${process.env['CIRCLE_SHA1']}.json.gz`,
+          Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
           CacheControl: 'max-age=300',
           ContentType: 'application/json'
       }, function (putObjectError, res) {
