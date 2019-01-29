@@ -106,13 +106,16 @@ function query(after) {
 
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
-
+            console.log('ROW: ' + row);
             rows.push(row);
         }
 
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
+          // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
+          console.log('ALL ROWS: ' JSON.stringify(rows.reverse()));
+          
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
                 Bucket: 'mapbox',
@@ -128,6 +131,9 @@ function query(after) {
 
 github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATION_ID})
     .then(({data}) => {
+      // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
         github.authenticate({type: 'token', token: data.token});
-        return query();
+        return query().then(function() { 
+          console.log('Upload to AWS here')
+        });
     });
