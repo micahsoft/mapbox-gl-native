@@ -114,7 +114,7 @@ function query(after) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
-          console.log('ALL ROWS: ' JSON.stringify(rows.reverse()));
+          console.log('ALL ROWS: ' + JSON.stringify(rows.reverse()));
           
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
