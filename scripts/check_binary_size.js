@@ -70,6 +70,7 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
             })();
 
             console.log(`${label}: ${title} (${size} bytes)`);
+            console.log(`${label}: ${title} (${prettyBytes(size)} bytes - prettified 💅🏼)`);
 
             return github.checks.create({
                 owner: 'mapbox',
