@@ -33,6 +33,7 @@ github.authenticate({type: 'app', token});
 const platforms = [
     { 'platform': 'iOS', 'arch': 'armv7' },
     { 'platform': 'iOS', 'arch': 'arm64' },
+    { 'platform': 'iOS', 'arch': 'dynamic' },
     { 'platform': 'Android', 'arch': 'arm-v7' },
     { 'platform': 'Android', 'arch': 'arm-v8' },
     { 'platform': 'Android', 'arch': 'x86' },
