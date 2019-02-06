@@ -33,7 +33,7 @@ github.authenticate({type: 'app', token});
 const platforms = [
     { 'platform': 'iOS', 'arch': 'armv7' },
     { 'platform': 'iOS', 'arch': 'arm64' },
-    { 'platform': 'iOS', 'arch': 'dynamic' },
+    { 'platform': 'iOS', 'arch': 'Dynamic' },
     { 'platform': 'Android', 'arch': 'arm-v7' },
     { 'platform': 'Android', 'arch': 'arm-v8' },
     { 'platform': 'Android', 'arch': 'x86' },
@@ -86,7 +86,7 @@ function query(after) {
             }`
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
-
+        console.log('🐶 HISTORY: ' + history)
         for (const edge of history.edges) {
             const commit = edge.node;
             const suite = commit.checkSuites.nodes[0];
