@@ -86,6 +86,7 @@ function query(after) {
             }`
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
+        console.log('HISTORY: ' + JSON.stringify(history));
 
         for (const edge of history.edges) {
             const commit = edge.node;
@@ -119,7 +120,9 @@ function query(after) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
-            console.log('rows.reverse() - ' + JSON.stringify(rows.reverse()))
+            console.log('rows[0]: ' JSON.stringify(rows[0]));
+            console.log('rows.reverse() - ' + JSON.stringify(rows.reverse()));
+            
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
                 Bucket: 'mapbox',
