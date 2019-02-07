@@ -86,7 +86,7 @@ function query(after) {
             }`
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
-        console.log('🐶 HISTORY: ' + history)
+
         for (const edge of history.edges) {
             const commit = edge.node;
             const suite = commit.checkSuites.nodes[0];
@@ -99,15 +99,19 @@ function query(after) {
 
             for (let i = 0; i < platforms.length; i++) {
                 const {platform, arch} = platforms[i];
+                console.log(`const {platform, arch}: ` + platforms[i]);
 
                 const run = runs.find((run) => {
                     const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
                     return platform === p && arch === a;
                 });
+                console.log('run: ' + run);
+                
+                const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
 
-                row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
+                row[i + 1] = byteSize
+                console.log('bytesize: ' + byteSize);
             }
-            console.log('ROW: ' + row);
             rows.push(row);
         }
 
@@ -115,7 +119,6 @@ function query(after) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
-          console.log('ALL ROWS: ' + JSON.stringify(rows.reverse()));
           
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
@@ -131,10 +134,70 @@ function query(after) {
 }
 
 github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATION_ID})
-    .then(({data}) => {
-      // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
-        github.authenticate({type: 'token', token: data.token});
-        return query().then(function() { 
-          console.log('Upload to AWS here')
-        });
+.then(({data}) => {
+  // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
+    github.authenticate({type: 'token', token: data.token});
+    return query().then(function() { 
+      console.log('Upload to AWS here')
+      // sendDataWarehouseMetrics()
     });
+});
+
+// function sendDataWarehouseMetrics() {
+// 
+//     // Check if existing binary metrics exist.
+//   s3.getObject({
+//     Bucket: 'mapbox-loading-dock', 
+//     Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`
+//   }, (getObjectError, existingData) => {
+//     if (getObjectError) {
+//       // If no existing metrics are found,
+//       // create new metrics object.
+//       if (getObjectError.statusCode == 404) {
+//         return new AWS.S3({region: 'us-east-1'}).putObject({
+//             Body: zlib.gzipSync(androidMetrics),
+//             Bucket: 'mapbox-loading-dock',
+//             Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
+//             CacheControl: 'max-age=300',
+//             ContentType: 'application/json'
+//         }, function (putObjectError, res) {
+//           if (putObjectError) {
+//             console.log("Error uploading new binary size metrics: ", putObjectError);
+//           } else {
+//             console.log("Successfully uploaded new binary size metrics");
+//           }
+//         });
+// 
+//       } else {
+//         console.log('Unknown error checking for existing metrics in S3: ' + getObjectError);
+//       } 
+//     } else {
+//       // Read existing data and append additional Android metrics to it.
+//       var buf = Buffer.from(existingData.Body);
+// 
+//       zlib.unzip(buf, (unzipError, existingData) => {
+//        if (unzipError) throw unzipError;
+// 
+//        var iosMetrics = existingData.toString();
+//        var updatedMetrics = iosMetrics + '\n' + androidMetrics;
+// 
+//         // Upload updated data to S3.
+//         return new AWS.S3({region: 'us-east-1'}).putObject({
+//             Body: zlib.gzipSync(updatedMetrics),
+//             Bucket: 'mapbox-loading-dock',
+//             Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
+//             CacheControl: 'max-age=300',
+//             ContentType: 'application/json'
+//         }, function (putObjectError, res) {
+//           if (putObjectError) {
+//             console.log("Error uploading Android binary size metrics to existing metrics: ", putObjectError);
+//           } else {
+//             console.log("Successfully uploaded Android binary size metrics to existing metrics.")
+//           }
+//         });
+//       });
+//     }
+//   });
+// }
+// 
+  
