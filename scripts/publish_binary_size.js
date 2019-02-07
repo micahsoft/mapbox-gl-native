@@ -41,6 +41,7 @@ const platforms = [
 ];
 
 const rows = [];
+const history;
 
 function query(after) {
     return github.request({
@@ -85,8 +86,7 @@ function query(after) {
               }
             }`
     }).then((result) => {
-        const history = result.data.data.repository.ref.target.history;
-        console.log('HISTORY: ' + JSON.stringify(history));
+        history = result.data.data.repository.ref.target.history;
 
         for (const edge of history.edges) {
             const commit = edge.node;
@@ -142,65 +142,38 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
     github.authenticate({type: 'token', token: data.token});
     return query().then(function() { 
       console.log('Upload to AWS here')
-      // sendDataWarehouseMetrics()
+      sendDataWarehouseMetrics()
     });
 });
 
-// function sendDataWarehouseMetrics() {
-// 
-//     // Check if existing binary metrics exist.
-//   s3.getObject({
-//     Bucket: 'mapbox-loading-dock', 
-//     Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`
-//   }, (getObjectError, existingData) => {
-//     if (getObjectError) {
-//       // If no existing metrics are found,
-//       // create new metrics object.
-//       if (getObjectError.statusCode == 404) {
-//         return new AWS.S3({region: 'us-east-1'}).putObject({
-//             Body: zlib.gzipSync(androidMetrics),
-//             Bucket: 'mapbox-loading-dock',
-//             Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
-//             CacheControl: 'max-age=300',
-//             ContentType: 'application/json'
-//         }, function (putObjectError, res) {
-//           if (putObjectError) {
-//             console.log("Error uploading new binary size metrics: ", putObjectError);
-//           } else {
-//             console.log("Successfully uploaded new binary size metrics");
-//           }
-//         });
-// 
-//       } else {
-//         console.log('Unknown error checking for existing metrics in S3: ' + getObjectError);
-//       } 
-//     } else {
-//       // Read existing data and append additional Android metrics to it.
-//       var buf = Buffer.from(existingData.Body);
-// 
-//       zlib.unzip(buf, (unzipError, existingData) => {
-//        if (unzipError) throw unzipError;
-// 
-//        var iosMetrics = existingData.toString();
-//        var updatedMetrics = iosMetrics + '\n' + androidMetrics;
-// 
-//         // Upload updated data to S3.
-//         return new AWS.S3({region: 'us-east-1'}).putObject({
-//             Body: zlib.gzipSync(updatedMetrics),
-//             Bucket: 'mapbox-loading-dock',
-//             Key: `raw/mobile.binarysize/${process.env['CIRCLE_SHA1']}.json.gz`,
-//             CacheControl: 'max-age=300',
-//             ContentType: 'application/json'
-//         }, function (putObjectError, res) {
-//           if (putObjectError) {
-//             console.log("Error uploading Android binary size metrics to existing metrics: ", putObjectError);
-//           } else {
-//             console.log("Successfully uploaded Android binary size metrics to existing metrics.")
-//           }
-//         });
-//       });
-//     }
-//   });
-// }
-// 
+function sendDataWarehouseMetrics() {
+  const date = new Date();
+  var checkRuns = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
+  var metrics = []
+
+  for (let i = 0; i < platforms.length; i++) {
+      const {platform, arch} = platforms[i];
+      
+      platforms[i].platform
+      platforms[i].arch
+
+      const run = checkRuns.find((run) => {
+          const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
+          return platform === p && arch === a;
+      });
+      
+      const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
+      
+      metrics.push(JSON.stringify({
+        'sdk': 'maps',
+        'platform': platforms[i].platform,
+        'arch': platforms[i].arch,
+        'size': byteSize,
+        'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+      }))
+  }
+  
+  console.log(metrics.join('\n'))
+}
+
   
