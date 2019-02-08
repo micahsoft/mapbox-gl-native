@@ -41,7 +41,7 @@ const platforms = [
 ];
 
 const rows = [];
-const history;
+var history;
 
 function query(after) {
     return github.request({
