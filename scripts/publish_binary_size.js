@@ -89,8 +89,7 @@ function query(after) {
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
         
-        mostRecentRun = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
-        console.log(JSON.stringify(mostRecentRun))
+        mostRecentRun = history2
 
         for (const edge of history.edges) {
             const commit = edge.node;
