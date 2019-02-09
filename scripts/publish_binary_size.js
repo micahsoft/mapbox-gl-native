@@ -89,7 +89,7 @@ function query(after) {
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
         
-        mostRecentRun = history2
+        mostRecentRun = history
 
         for (const edge of history.edges) {
             const commit = edge.node;
