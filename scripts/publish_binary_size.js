@@ -40,9 +40,9 @@ const platforms = [
     { 'platform': 'Android', 'arch': 'x86_64' }
 ];
 
+var metrics = [];
 const rows = [];
-
-var mostRecentRun;
+const date = new Date();
 
 function query(after) {
     return github.request({
@@ -89,7 +89,9 @@ function query(after) {
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
         
-        mostRecentRun = history
+        console.log('--------- BEGIN HISTORY ---------')
+        console.log(JSON.stringify(history));
+        console.log('--------- END HISTORY ---------')
 
         for (const edge of history.edges) {
             const commit = edge.node;
@@ -112,6 +114,14 @@ function query(after) {
                 const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
 
                 row[i + 1] = byteSize
+                
+                metrics.push(JSON.stringify({
+                  'sdk': 'maps',
+                  'platform': platforms[i].platform,
+                  'arch': platforms[i].arch,
+                  'size': byteSize,
+                  'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+                }))
             }
             rows.push(row);
         }
@@ -144,34 +154,7 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
 });
 
 function sendDataWarehouseMetrics() {
-  const date = new Date();
-  console.log('sendDataWarehouseMetrics RUNS -- ' + JSON.stringify(mostRecentRun))
-  // var checkRuns = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
-  // var metrics = []
-  // 
-  // for (let i = 0; i < platforms.length; i++) {
-  //     const {platform, arch} = platforms[i];
-  // 
-  //     platforms[i].platform
-  //     platforms[i].arch
-  // 
-  //     const run = checkRuns.find((run) => {
-  //         const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
-  //         return platform === p && arch === a;
-  //     });
-  // 
-  //     const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
-  // 
-  //     metrics.push(JSON.stringify({
-  //       'sdk': 'maps',
-  //       'platform': platforms[i].platform,
-  //       'arch': platforms[i].arch,
-  //       'size': byteSize,
-  //       'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
-  //     }))
-  // }
-  // 
-  // console.log(metrics.join('\n'))
+  console.log(metrics.join('\n'))
 }
 
   
