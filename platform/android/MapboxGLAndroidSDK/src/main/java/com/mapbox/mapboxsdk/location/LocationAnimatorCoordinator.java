@@ -156,12 +156,12 @@ final class LocationAnimatorCoordinator {
 
   void startLocationCirclePulsing(LocationComponentOptions options, MapboxMap mapboxMap, Location location) {
     float targetPulsingCircleRadius = Utils.calculatePulsingCircleRadius(mapboxMap, location);
-    if (previousPulsingCircleRadius < 0) {
+   /* if (previousPulsingCircleRadius < 0) {
       previousPulsingCircleRadius = targetPulsingCircleRadius;
-    }
+    }*/
     playPulsingCircleAnimator(options.pulsingCircleDuration(), options.pulsingCircleInterpolator(),
-      mapboxMap, targetPulsingCircleRadius);
-    this.previousPulsingCircleRadius = targetPulsingCircleRadius;
+      mapboxMap, targetPulsingCircleRadius, (long) options.pulsingCircleFrequency());
+//    this.previousPulsingCircleRadius = targetPulsingCircleRadius;
   }
 
   private LatLng getPreviousLayerLatLng() {
@@ -309,7 +309,8 @@ final class LocationAnimatorCoordinator {
   }
 
   private void playPulsingCircleAnimator(float durationOfSinglePulse, String interpolatorAnimationType,
-                                         MapboxMap mapboxMap, float targetPulsingCircleRadius) {
+                                         MapboxMap mapboxMap, float targetPulsingCircleRadius,
+                                         long targetPulsingCircleFrequency) {
     Interpolator interpolatorAnimationToUse;
     switch(interpolatorAnimationType) {
       case PulsingLocationMode.LINEAR:
@@ -329,7 +330,7 @@ final class LocationAnimatorCoordinator {
         break;
     }
     new PulsingLocationCircleAnimator().animatePulsingCircleRadius(interpolatorAnimationToUse,
-      durationOfSinglePulse, mapboxMap, targetPulsingCircleRadius);
+      durationOfSinglePulse, mapboxMap, targetPulsingCircleRadius, targetPulsingCircleFrequency);
   }
 
   void resetAllCameraAnimations(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {

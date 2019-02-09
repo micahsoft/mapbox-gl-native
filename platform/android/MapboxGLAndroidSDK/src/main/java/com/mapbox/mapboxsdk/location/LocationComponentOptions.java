@@ -74,11 +74,6 @@ public class LocationComponentOptions implements Parcelable {
   private static final long  CIRCLE_PULSING_DURATION_MILLIS_DEFAULT= 1000;
 
   /**
-   * Default opacity of the LocationComponent circle when it starts a single pulse.
-   */
-  private static final long CIRCLE_PULSING_STARTING_OPACITY_DEFAULT = 1;
-
-  /**
    * Default number of milliseconds which pass after the LocationComponent circle pulse ends and a new pulse begins.
    */
   private static final float CIRCLE_PULSING_FREQUENCY_MILLIS_DEFAULT = 1800;
@@ -87,11 +82,6 @@ public class LocationComponentOptions implements Parcelable {
    * Default opacity of the LocationComponent circle when it ends a single pulse.
    */
   private static final float CIRCLE_PULSING_FINAL_ALPHA_DEFAULT = 0.6f;
-
-  /**
-   * Default interpolator of the LocationComponent circle
-   */
-  private static final String CIRCLE_PULSING_FINAL_INTERPOLATOR_DEFAULT = PulsingLocationMode.LINEAR;
 
   /**
    * Default color of the pulsing LocationComponent circle.
@@ -350,7 +340,7 @@ public class LocationComponentOptions implements Parcelable {
     if (typedArray.hasValue(R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor)) {
       builder.backgroundTintColor(typedArray.getColor(
         R.styleable.mapbox_LocationComponent_mapbox_pulsingLocationCircleColor,
-        -1));
+        CIRCLE_PULSING_COLOR_DEFAULT));
     }
 
     builder.pulsingCircleDuration = typedArray.getFloat(

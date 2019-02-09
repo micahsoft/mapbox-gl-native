@@ -141,13 +141,13 @@ public class LocationModesActivity extends AppCompatActivity implements OnMapRea
         .pulsingCircleAlpha(0.4f)
         .build();
 
+      LocationEngineRequest request = new LocationEngineRequest.Builder(750)
+        .setFastestInterval(750)
+        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+        .build();
+
       locationComponent = mapboxMap.getLocationComponent();
-      locationComponent.activateLocationComponent(this, style, true,
-        new LocationEngineRequest.Builder(750)
-          .setFastestInterval(750)
-          .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-          .build()
-      );
+      locationComponent.activateLocationComponent(this, style, true, request, options);
       toggleStyle();
       locationComponent.setLocationComponentEnabled(true);
       locationComponent.addOnLocationClickListener(this);
