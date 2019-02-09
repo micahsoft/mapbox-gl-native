@@ -89,13 +89,16 @@ function query(after) {
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
         
-        console.log('--------- BEGIN HISTORY ---------')
-        console.log(JSON.stringify(history));
-        console.log('--------- END HISTORY ---------')
+        // console.log('--------- BEGIN HISTORY ---------')
+        // console.log(JSON.stringify(history));
+        // console.log('--------- END HISTORY ---------')
 
         for (const edge of history.edges) {
             const commit = edge.node;
             const suite = commit.checkSuites.nodes[0];
+            
+            console.log('commit - edge.node: ' + JSON.stringify(commit));
+            console.log('suite = commit.checkSuites.nodes[0]: ' + JSON.stringify(suite));
 
             if (!suite)
                 continue;
