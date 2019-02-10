@@ -3,9 +3,9 @@
 
 namespace mbgl {
     
-void TaggedString::addSection(const std::u16string& sectionText, double scale, FontStackHash fontStack) {
+void TaggedString::addSection(const std::u16string& sectionText, double scale, FontStack fontStack, const optional<std::string>& sectionID) {
     styledText.first += sectionText;
-    sections.emplace_back(scale, fontStack);
+    sections.emplace_back(scale, fontStack, sectionID);
     styledText.second.resize(styledText.first.size(), sections.size() - 1);
 }
 
@@ -19,7 +19,7 @@ void TaggedString::trim() {
         std::size_t trailingWhitespace = styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1;
 
         styledText.first = styledText.first.substr(beginningWhitespace, trailingWhitespace - beginningWhitespace);
-        styledText.second = std::vector<uint8_t>(styledText.second.begin() + beginningWhitespace, styledText.second.begin() + trailingWhitespace);
+        styledText.second = std::vector<std::size_t>(styledText.second.begin() + beginningWhitespace, styledText.second.begin() + trailingWhitespace);
     }
 }
 
@@ -34,6 +34,21 @@ double TaggedString::getMaxScale() const {
 void TaggedString::verticalizePunctuation() {
     // Relies on verticalization changing characters in place so that style indices don't need updating
     styledText.first = util::i18n::verticalizePunctuation(styledText.first);
+}
+
+bool TaggedString::hasMultipleUniqueSections() const noexcept {
+    if (sections.size() < 2) {
+        return false;
+    }
+
+    const auto& sectionID = sections.at(0).sectionID;
+    for (std::size_t i = 1; i < sections.size(); ++i) {
+        if (sectionID != sections.at(i).sectionID) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace mbgl
