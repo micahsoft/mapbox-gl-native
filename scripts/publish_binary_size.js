@@ -117,6 +117,7 @@ function query(after) {
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
           var commit = history.edges[0].node.oid
+          console.log(JSON.stringify(history))
           var checkRunsForCommit = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
           var metrics = []
 
