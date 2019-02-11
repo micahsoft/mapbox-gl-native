@@ -88,17 +88,10 @@ function query(after) {
             }`
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
-        
-        // console.log('--------- BEGIN HISTORY ---------')
-        // console.log(JSON.stringify(history));
-        // console.log('--------- END HISTORY ---------')
 
         for (const edge of history.edges) {
             const commit = edge.node;
             const suite = commit.checkSuites.nodes[0];
-            
-            console.log('commit - edge.node: ' + JSON.stringify(commit));
-            console.log('suite = commit.checkSuites.nodes[0]: ' + JSON.stringify(suite));
 
             if (!suite)
                 continue;
@@ -113,18 +106,8 @@ function query(after) {
                     const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
                     return platform === p && arch === a;
                 });
-                
-                const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
 
-                row[i + 1] = byteSize
-                
-                metrics.push(JSON.stringify({
-                  'sdk': 'maps',
-                  'platform': platforms[i].platform,
-                  'arch': platforms[i].arch,
-                  'size': byteSize,
-                  'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
-                }))
+                row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
             rows.push(row);
         }
@@ -133,6 +116,34 @@ function query(after) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
+          var commit = history.edges[0].node.oid
+          var checkRunsForCommit = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
+          var metrics = []
+
+          for (let i = 0; i < platforms.length; i++) {
+              const {platform, arch} = platforms[i];
+              
+              platforms[i].platform
+              platforms[i].arch
+
+              const run = checkRunsForCommit.find((run) => {
+                  const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
+                  return platform === p && arch === a;
+              });
+              
+              const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
+              
+              metrics.push(JSON.stringify({
+                'sdk': 'maps',
+                'platform': platforms[i].platform,
+                'arch': platforms[i].arch,
+                'size': byteSize,
+                'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+              }))
+          }
+          
+          console.log(metrics.join('\n'));
+            
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
                 Bucket: 'mapbox',
@@ -151,13 +162,8 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
   // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
     github.authenticate({type: 'token', token: data.token});
     return query().then(function() { 
-      console.log('Upload to AWS here')
-      sendDataWarehouseMetrics()
+      console.log('Upload to AWS here?')
     });
 });
-
-function sendDataWarehouseMetrics() {
-  console.log(metrics.join('\n'))
-}
 
   
