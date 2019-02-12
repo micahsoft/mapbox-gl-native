@@ -40,7 +40,7 @@ const platforms = [
     { 'platform': 'Android', 'arch': 'x86_64' }
 ];
 
-var metrics = [];
+const metrics = [];
 const rows = [];
 const date = new Date();
 
