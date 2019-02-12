@@ -89,7 +89,7 @@ function query(after) {
     }).then((result) => {
         const history = result.data.data.repository.ref.target.history;
         
-        if metrics.length == 0 {
+        if (metrics.length == 0) {
           metrics.push('test');
           console.log('HISTORY should only be logged once: \n' + JSON.stringify(history));
         }
