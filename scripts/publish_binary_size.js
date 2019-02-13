@@ -87,11 +87,12 @@ function query(after) {
               }
             }`
     }).then((result) => {
+        
         const history = result.data.data.repository.ref.target.history;
         
-        if (metrics.length == 0) {
-          metrics.push('test');
+        if (metrics === undefined || metrics.length == 0) {
           console.log('HISTORY should only be logged once: \n' + JSON.stringify(history));
+          metrics.push('test');
         }
 
         for (const edge of history.edges) {
@@ -115,16 +116,13 @@ function query(after) {
                 row[i + 1] = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
             }
             rows.push(row);
+            
         }
 
         if (history.pageInfo.hasNextPage) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
-          var commit = history.edges[0].node.oid
-          console.log(JSON.stringify(history))
-          var checkRunsForCommit = history.edges[0].node.checkSuites.nodes[0].checkRuns.nodes
-          var metrics = []
 
           for (let i = 0; i < platforms.length; i++) {
               const {platform, arch} = platforms[i];
