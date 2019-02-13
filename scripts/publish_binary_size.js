@@ -40,7 +40,7 @@ const platforms = [
     { 'platform': 'Android', 'arch': 'x86_64' }
 ];
 
-const metrics = [];
+const mostRecentHistory = [];
 const rows = [];
 const date = new Date();
 
@@ -90,9 +90,8 @@ function query(after) {
         
         const history = result.data.data.repository.ref.target.history;
         
-        if (metrics === undefined || metrics.length == 0) {
-          console.log('HISTORY should only be logged once: \n' + JSON.stringify(history));
-          metrics.push('test');
+        if (mostRecentHistory === undefined || mostRecentHistory.length == 0) {
+          metrics.push(history);
         }
 
         for (const edge of history.edges) {
@@ -141,8 +140,34 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
   // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
     github.authenticate({type: 'token', token: data.token});
     return query().then(function() { 
-      console.log('Upload to AWS here?')
+      const payload = generateDataWarehouseMetrics(mostRecentHistory[0])
+      console.log('Generated_payload: \n' + payload)
     });
 });
+
+function generateDataWarehouseMetrics(mostRecentHistory) {
+  const metrics = [];
+  
+  for (let i = 0; i < platforms.length; i++) {
+      const {platform, arch} = platforms[i];
+
+      const run = mostRecentHistory.find((run) => {
+          const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
+          return platform === p && arch === a;
+      });
+
+      const size = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
+      
+      metrics.push(JSON.stringify({
+          'sdk': 'maps',
+          'platform' : platform,
+          'arch': arch,
+          'size' : size,
+          'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
+      }));
+  }
+  
+  return metrics.join('\n');
+}
 
   
