@@ -123,31 +123,6 @@ function query(after) {
             return query(history.pageInfo.endCursor);
         } else {
           // On line 116, instead of creating and returning a new putObject promise, populate the sizeCheckInfo object with all the appropriate information from the row.
-
-          for (let i = 0; i < platforms.length; i++) {
-              const {platform, arch} = platforms[i];
-              
-              platforms[i].platform
-              platforms[i].arch
-
-              const run = checkRunsForCommit.find((run) => {
-                  const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
-                  return platform === p && arch === a;
-              });
-              
-              const byteSize = run ? +run.summary.match(/is (\d+) bytes/)[1] : undefined;
-              
-              metrics.push(JSON.stringify({
-                'sdk': 'maps',
-                'platform': platforms[i].platform,
-                'arch': platforms[i].arch,
-                'size': byteSize,
-                'created_at': `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`
-              }))
-          }
-          
-          console.log(metrics.join('\n'));
-            
             return new AWS.S3({region: 'us-east-1'}).putObject({
                 Body: zlib.gzipSync(JSON.stringify(rows.reverse())),
                 Bucket: 'mapbox',
