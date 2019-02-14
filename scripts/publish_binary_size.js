@@ -91,7 +91,7 @@ function query(after) {
         const history = result.data.data.repository.ref.target.history;
         
         if (mostRecentHistory === undefined || mostRecentHistory.length == 0) {
-          metrics.push(history);
+          mostRecentHistory.push(history);
         }
 
         for (const edge of history.edges) {
