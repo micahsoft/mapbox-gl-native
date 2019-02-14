@@ -139,13 +139,15 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
 .then(({data}) => {
   // On line 132, chain a then clause onto query. Here, call two methods (1) to publish the binary-size metrics to the mapbox bucket, and (2) to publish the metrics to the mapbox-load-dock bucket in the respective formats.
     github.authenticate({type: 'token', token: data.token});
-    return query().then(function() { 
-      const payload = generateDataWarehouseMetrics(mostRecentHistory[0])
+    return query().then(function() {
+      console.log('mostRecentHistory = \n' + JSON.stringify(mostRecentHistory)) 
+      const payload = generateDataWarehouseMetrics(mostRecentHistory)
       console.log('Generated_payload: \n' + payload)
     });
 });
 
 function generateDataWarehouseMetrics(mostRecentHistory) {
+  console.log('mostRecentHistory = \n' + JSON.stringify(mostRecentHistory))
   const metrics = [];
   
   for (let i = 0; i < platforms.length; i++) {
