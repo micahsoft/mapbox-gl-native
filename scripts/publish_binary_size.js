@@ -141,7 +141,7 @@ github.apps.createInstallationToken({installation_id: SIZE_CHECK_APP_INSTALLATIO
     github.authenticate({type: 'token', token: data.token});
     return query().then(function() {
       console.log('mostRecentHistory = \n' + JSON.stringify(mostRecentHistory)) 
-      const payload = generateDataWarehouseMetrics(mostRecentHistory)
+      const payload = generateDataWarehouseMetrics(mostRecentHistory[0])
       console.log('Generated_payload: \n' + payload)
     });
 });
