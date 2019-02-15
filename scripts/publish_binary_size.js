@@ -152,8 +152,10 @@ function generateDataWarehouseMetrics(mostRecentHistory) {
   
   for (let i = 0; i < platforms.length; i++) {
       const {platform, arch} = platforms[i];
+      
+      const runs = mostRecentHistory.edges[0].node.checkSuites.nodes[0].checkRuns.nodes;
 
-      const run = mostRecentHistory.find((run) => {
+      const run = runs.find((run) => {
           const [, p, a] = run.name.match(/Size - (\w+) ([\w-]+)/);
           return platform === p && arch === a;
       });
